@@ -11,6 +11,7 @@ const {
     search,
     orderByDevices,
     collectTodaysStat,
+    exportAllDevices,
 } = require('../controller/devices.controller');
 
 const router = new Router({ prefix: '/devices' });
@@ -35,4 +36,5 @@ router.get('/', findAll);
 router.get('/search', search);
 router.get('/sortBy', orderByDevices);
 router.get('/collectTodaysStat', collectTodaysStat)
+router.get('/exportDevicesList', exportAllDevices)
 module.exports = router;

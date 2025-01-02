@@ -6,24 +6,18 @@ class DevicesService
 {
     async createGoods(goods)
     {
-        console.log("goods:" + JSON.stringify(goods));
         const deviceVM = await Devices.findOne({ where: { vm: goods.vm } });
-        console.log("deviceVM:" + JSON.stringify(deviceVM));
         if (deviceVM == null)
         {
-            console.log("新增数据");
             const res = await Devices.create(goods);
             return res.dataValues;
         }
         else
         {
-            console.log("更新数据");
             const { vm, ...data } = goods;
             const res = await Devices.update(data, { where: { vm } });
             return res[0] == 1 ? true : false;
         }
-
-
     }
 
     async updateGoods(vm, goods)
@@ -43,7 +37,6 @@ class DevicesService
     async restoreGoods(vm)
     {
         const res = await Devices.restore({ where: { vm } });
-
         return res > 0 ? true : false;
     }
 
@@ -71,7 +64,6 @@ class DevicesService
     async searchDevice(vm)
     {
         const res = await Devices.findOne({ where: { vm } });
-        console.log("search res :" + JSON.stringify(res));
         return res;
     }
     async collectTodaysData()
@@ -89,7 +81,6 @@ class DevicesService
             // 将毫秒转换为天数
             const differenceInDays = Math.ceil(differenceInMilliseconds / (1000 * 60 * 60 * 24));
 
-            console.log("距离2024-11-13已经有" + differenceInDays + "天")
             if (differenceInDays <= 0)
             {
                 throw new Error("x must be greater than 0");
@@ -104,32 +95,49 @@ class DevicesService
             const now = new Date();
             const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
             const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-            const traded_vm_number = await Devices.count({
+
+            const date = new Date()
+            const today = date.toJSON().slice(0, 10)
+            const yesterday = new Date(date);
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = yesterday.toJSON().slice(0, 10)
+
+            const total_stock = await Devices.sum('diamond')
+
+            let daily_produce = 0;
+
+            const todayRecordList = [];
+
+            let historyDealRecordJsonList = await Devices.findAll({
+                attributes: ["historyDealRecord"],
                 where: {
+                    historyDealRecord: { [Op.ne]: null },
                     updated_at: {
                         [Op.gte]: startOfDay, // 大于等于今天的开始时间
                         [Op.lte]: endOfDay    // 小于等于今天的结束时间
                     }
                 }
             })
-
-            const total_stock = await Devices.sum('diamond')
-
-            let records = await Devices.findAll({
-                attributes: ["dailyDiamond"]
+            const traded_vm_number = historyDealRecordJsonList.length;
+            historyDealRecordJsonList.map(list =>
+            {
+                const record = JSON.parse(list.historyDealRecord)
+                for (let key in record)
+                {
+                    if (key.startsWith(today))
+                    {
+                        todayRecordList.push(record[key])
+                    }
+                }
             })
 
-            let daily_produce = 0;
-            records.map(record =>daily_produce += record.dailyDiamond)
-      
-            const date = new Date()
-            const yesterday = new Date(date);
-            yesterday.setDate(yesterday.getDate() - 1);
-            const yesterdayStr = yesterday.toJSON().slice(0,10)
+            todayRecordList.map(item =>
+            {
+                daily_produce += item[0]
+            })
+
             let yesterdayStat = await findData({ date: yesterdayStr })
             yesterdayStat = yesterdayStat.dataValues;
-
-            console.log(yesterdayStat)
 
             daily_produce = Math.floor(daily_produce * 0.03);
             const total_produce = daily_produce + yesterdayStat.total_produce;
@@ -138,7 +146,7 @@ class DevicesService
             const account_value = Math.floor(traded_vm_number * logGrowthFunction())
 
             const todayStat = {
-                "date": new Date().toJSON().slice(0, 10),
+                "date": today,
                 "total_value": account_value + total_produce,
                 "total_stock": Math.floor(total_stock * 0.03),
                 "daily_produce": daily_produce,
@@ -164,6 +172,13 @@ class DevicesService
         const res = await Devices.findAll({
             order: [...arr],
             limit: 500
+        })
+        return res;
+    }
+    async exportDeviceList(fields)
+    {
+        const res = await Devices.findAll({
+            attributes: [...fields]
         })
         return res;
     }

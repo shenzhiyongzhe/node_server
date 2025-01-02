@@ -16,6 +16,7 @@ const {
     searchDevice,
     collectTodaysData,
     orderDevice,
+    exportDeviceList,
 } = require('../service/devices.service');
 
 class DevicesController
@@ -147,7 +148,7 @@ class DevicesController
             return ctx.app.emit('error', publishGoodsError, ctx);
         }
     }
-    
+
     async collectTodaysStat(ctx)
     {
         try
@@ -169,7 +170,7 @@ class DevicesController
         try
         {
             const sortArr = JSON.parse(ctx.request.query.sortByArr)
-            console.log("排序参数：" + JSON.stringify(sortArr))
+            console.log("排序参数：" + ctx.request.query.sortByArr)
             const res = await orderDevice(sortArr)
             ctx.body = {
                 code: 0,
@@ -177,6 +178,25 @@ class DevicesController
                 result: res,
             };
         } catch (error)
+        {
+            console.error(error);
+        }
+    }
+    async exportAllDevices(ctx)
+    {
+        try
+        {
+            const fields = JSON.parse(ctx.request.query.fields)
+            // console.log(typeof ctx.request.query.fields);
+            console.log('请求的字段有：' + ctx.request.query.fields);
+            const res = await exportDeviceList(fields)
+            ctx.body = {
+                code: 0,
+                message: "获取所有设备信息成功。",
+                result: res
+            }
+        }
+        catch (error)
         {
             console.error(error);
         }
