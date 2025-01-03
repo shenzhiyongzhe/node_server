@@ -47,15 +47,12 @@ class DevicesController
     }
     async create(ctx)
     {
-        // 直接调用service的createGoods方法
         try
         {
-            console.log("create" + JSON.stringify(ctx.request.body));
             const res = await createGoods(ctx.request.body);
-
             ctx.body = {
                 code: 0,
-                message: '添加数据成功',
+                message: '更新device数据成功',
                 result: res,
             };
         } catch (err)

@@ -4,20 +4,19 @@ const { addData, findData, } = require("../service/stat")
 
 class DevicesService
 {
-    async createGoods(goods)
+    async createGoods(vmInfo)
     {
-        const deviceVM = await Devices.findOne({ where: { vm: goods.vm } });
-        if (deviceVM == null)
+        const { vm, ...data } = vmInfo;
+        const [devices, created] = await Devices.findOrCreate({
+            where: { vm },
+            defaults: vmInfo
+        })
+
+        if (!created)
         {
-            const res = await Devices.create(goods);
-            return res.dataValues;
+            await Devices.update(data, { where: { vm } });
         }
-        else
-        {
-            const { vm, ...data } = goods;
-            const res = await Devices.update(data, { where: { vm } });
-            return res[0] == 1 ? true : false;
-        }
+        return devices
     }
 
     async updateGoods(vm, goods)
@@ -107,9 +106,10 @@ class DevicesService
             let daily_produce = 0;
 
             const todayRecordList = [];
+            const tradedVMList = [];
 
             let historyDealRecordJsonList = await Devices.findAll({
-                attributes: ["historyDealRecord"],
+                attributes: ["vm", "historyDealRecord"],
                 where: {
                     historyDealRecord: { [Op.ne]: null },
                     updated_at: {
@@ -118,7 +118,7 @@ class DevicesService
                     }
                 }
             })
-            const traded_vm_number = historyDealRecordJsonList.length;
+
             historyDealRecordJsonList.map(list =>
             {
                 const record = JSON.parse(list.historyDealRecord)
@@ -127,9 +127,13 @@ class DevicesService
                     if (key.startsWith(today))
                     {
                         todayRecordList.push(record[key])
+                        tradedVMList.push(list.vm)
                     }
                 }
             })
+
+            const filterTradedVMList = [...new Set(tradedVMList)]
+            const traded_vm_number = filterTradedVMList.length;
 
             todayRecordList.map(item =>
             {
