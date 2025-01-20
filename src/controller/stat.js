@@ -6,9 +6,7 @@ class StatController
     {
         try
         {
-            console.log("create" + JSON.stringify(ctx.request.body));
             const res = await addData(ctx.request.body);
-
             ctx.body = {
                 code: 0,
                 message: '添加或更新数据成功',

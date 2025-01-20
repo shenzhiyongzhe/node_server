@@ -18,7 +18,7 @@ const Stat = seq.define(
             type: DataTypes.BIGINT.UNSIGNED,
             comment: '总库存'
         },
-        daily_produce:{
+        daily_produce: {
             type: DataTypes.BIGINT.UNSIGNED,
             comment: '每日产出'
         },
@@ -30,17 +30,17 @@ const Stat = seq.define(
             type: DataTypes.BIGINT.UNSIGNED,
             comment: '净收益',
         },
-        total_income:{
+        total_income: {
             type: DataTypes.BIGINT.UNSIGNED,
             comment: '总收益'
         },
-        traded_vm_number:{
-            type:DataTypes.INTEGER.UNSIGNED,
-            comment:'已交易设备数量'
+        traded_vm_number: {
+            type: DataTypes.INTEGER.UNSIGNED,
+            comment: '已交易设备数量'
         },
-        total_vm_number:{
-            type:DataTypes.INTEGER,
-            comment:'总设备'
+        total_vm_number: {
+            type: DataTypes.INTEGER,
+            comment: '总设备'
         },
         account_value: {
             type: DataTypes.BIGINT.UNSIGNED,
@@ -53,6 +53,14 @@ const Stat = seq.define(
         total_cost: {
             type: DataTypes.BIGINT.UNSIGNED,
             comment: '总成本'
+        },
+        daily_shipment: {
+            type: DataTypes.INTEGER.UNSIGNED,
+            comment: '每日出货量'
+        },
+        total_shipment: {
+            type: DataTypes.INTEGER.UNSIGNED,
+            comment: '总出货量'
         },
         created_at: {
             type: DataTypes.DATE,

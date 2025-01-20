@@ -91,7 +91,7 @@ class DevicesController
         {
             ctx.body = {
                 code: 0,
-                message: '下架商品成功',
+                message: '软删除数据devices成功',
                 result: '',
             };
         } else

@@ -96,10 +96,10 @@ class DevicesService
             const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
 
             const date = new Date()
-            const today = date.toJSON().slice(0, 10)
+            const today = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, 0)}-${date.getDate().toString().padStart(2, 0)}`
             const yesterday = new Date(date);
             yesterday.setDate(yesterday.getDate() - 1);
-            const yesterdayStr = yesterday.toJSON().slice(0, 10)
+            const yesterdayStr = `${yesterday.getFullYear()}-${(yesterday.getMonth() + 1).toString().padStart(2, 0)}-${yesterday.getDate().toString().padStart(2, 0)}`
 
             const total_stock = await Devices.sum('diamond')
 
