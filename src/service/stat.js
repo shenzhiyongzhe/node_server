@@ -2,22 +2,15 @@ const Stat = require('../model/stat');
 
 class StatService
 {
-    async addData(data)
+    async createOrUpdateStat(statData)
     {
-        console.log("添加或更新统计数据:" + JSON.stringify(data));
-        const date = await Stat.findOne({ where: { date: data.date } });
-        console.log("date:" + JSON.stringify(date));
-        if (date == null)
+        const { date, ...detail } = statData;
+        const [stats, created] = await Stat.findOrCreate({ where: { date }, defaults: statData });
+        if (!created)
         {
-            const res = await Stat.create(data);
-            return res.dataValues;
+            await Stat.update(detail, { where: { date } });
         }
-        else
-        {
-            const { date, ...params } = data;
-            const res = await Stat.update(data, { where: { date } });
-            return res[0] == 1 ? "更新成功" : "更新失败";
-        }
+        return stats;
     }
 
     async findData(params)

@@ -1,6 +1,6 @@
 const { Op } = require('sequelize');
 const Devices = require('../model/devices');
-const { addData, findData, } = require("../service/stat")
+const { createOrUpdateStat, findData, } = require("../service/stat")
 
 class DevicesService
 {
@@ -41,17 +41,12 @@ class DevicesService
 
     async findDevices(pageNum, pageSize)
     {
-        // // 1. 获取总数
-        // const count = await Goods.count()
-        // // console.log(count)
-        // // 2. 获取分页的具体数据
-        // const offset = (pageNum - 1) * pageSize
-        // const rows = await Goods.findAll({ offset: offset, limit: pageSize * 1 })
-
         const offset = (pageNum - 1) * pageSize;
         const { count, rows } = await Devices.findAndCountAll({
             offset: offset,
             limit: pageSize * 1,
+            attributes: { exclude: ['historyDealRecord'] }
+
         });
         return {
             pageNum,
@@ -65,14 +60,15 @@ class DevicesService
         const res = await Devices.findOne({ where: { vm } });
         return res;
     }
+
     async collectTodaysData()
     {
-        const logGrowthFunction = () =>
+        const logGrowthFunction = (created_at) =>
         {
             const currentDate = new Date();
 
             // 将目标日期转换为 Date 对象
-            const targetDate = new Date('2024-11-13')
+            const targetDate = new Date(created_at)
 
             // 计算两个日期之间的差值（以毫秒为单位）
             const differenceInMilliseconds = currentDate - targetDate;
@@ -86,10 +82,11 @@ class DevicesService
             }
             return 25 * Math.log(differenceInDays) + 40;
         }
-
         try
         {
-            const total_vm_number = await Devices.count()
+            const total_vm_number = await Devices.count({ where: { banTimes: { [Op.eq]: 0 } } })
+
+            const total_stock = await Devices.sum('diamond', { where: { banTimes: { [Op.eq]: 0 } } })
 
             const now = new Date();
             const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -101,15 +98,14 @@ class DevicesService
             yesterday.setDate(yesterday.getDate() - 1);
             const yesterdayStr = `${yesterday.getFullYear()}-${(yesterday.getMonth() + 1).toString().padStart(2, 0)}-${yesterday.getDate().toString().padStart(2, 0)}`
 
-            const total_stock = await Devices.sum('diamond')
-
             let daily_produce = 0;
 
             const todayRecordList = [];
             const tradedVMList = [];
+            const createdCharacterTimeList = []
 
             let historyDealRecordJsonList = await Devices.findAll({
-                attributes: ["vm", "historyDealRecord"],
+                attributes: ["vm", "historyDealRecord", "config"],
                 where: {
                     historyDealRecord: { [Op.ne]: null },
                     updated_at: {
@@ -128,18 +124,41 @@ class DevicesService
                     {
                         todayRecordList.push(record[key])
                         tradedVMList.push(list.vm)
+                        const config = JSON.parse(list.config)
+                        if (config.createCharacterTime)
+                        {
+                            createdCharacterTimeList.push([list.vm, config.createCharacterTime])
+                        }
                     }
                 }
             })
 
             const filterTradedVMList = [...new Set(tradedVMList)]
             const traded_vm_number = filterTradedVMList.length;
+            const filterCreatedCharacterList = []
 
+            for (let i = 0; i < filterTradedVMList.length; i++)
+            {
+                for (let j = 0; j < createdCharacterTimeList.length; j++)
+                {
+                    if (filterTradedVMList[i] == createdCharacterTimeList[j][0])
+                    {
+                        filterCreatedCharacterList.push(createdCharacterTimeList[j][1])
+                        break;
+                    }
+                }
+            }
             todayRecordList.map(item =>
             {
                 daily_produce += item[0]
             })
 
+            let account_value = 0
+
+            filterCreatedCharacterList.map(item =>
+            {
+                account_value += Math.floor(logGrowthFunction(item))
+            })
             let yesterdayStat = await findData({ date: yesterdayStr })
             yesterdayStat = yesterdayStat.dataValues;
 
@@ -147,7 +166,6 @@ class DevicesService
             const total_produce = daily_produce + yesterdayStat.total_produce;
             const fixedCost = Math.floor(traded_vm_number * 1.17)
             const net_income = daily_produce - fixedCost
-            const account_value = Math.floor(traded_vm_number * logGrowthFunction())
 
             const todayStat = {
                 "date": today,
@@ -163,8 +181,8 @@ class DevicesService
                 "fixed_cost": fixedCost,
                 "total_cost": yesterdayStat.total_cost + fixedCost,
             };
-            addData(todayStat)
-            return todayStat
+            const res = await createOrUpdateStat(todayStat)
+            return res
 
         } catch (error)
         {
@@ -175,7 +193,8 @@ class DevicesService
     {
         const res = await Devices.findAll({
             order: [...arr],
-            limit: 500
+            limit: 500,
+            attributes: { exclude: ['historyDealRecord'] }
         })
         return res;
     }

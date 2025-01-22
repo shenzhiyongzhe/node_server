@@ -131,7 +131,6 @@ class DevicesController
     {
         try
         {
-            console.log("设备搜索参数：:" + JSON.stringify(ctx.request.query));
             const res = await searchDevice(ctx.request.query.vm);
 
             ctx.body = {
@@ -151,7 +150,6 @@ class DevicesController
         try
         {
             const res = await collectTodaysData()
-            console.log(res)
             ctx.body = {
                 code: 0,
                 message: '搜索数据成功',
@@ -184,7 +182,6 @@ class DevicesController
         try
         {
             const fields = JSON.parse(ctx.request.query.fields)
-            // console.log(typeof ctx.request.query.fields);
             console.log('请求的字段有：' + ctx.request.query.fields);
             const res = await exportDeviceList(fields)
             ctx.body = {

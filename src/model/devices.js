@@ -48,6 +48,12 @@ const Devices = seq.define(
             defaultValue: 0,
             comment: '日收益'
         },
+        banTimes: {
+            type: DataTypes.SMALLINT.UNSIGNED,
+            allowNull: true,
+            defaultValue: 0,
+            comment: '设备封禁次数'
+        },
         historyDealRecord: {
             type: DataTypes.JSON,
             allowNull: true,
