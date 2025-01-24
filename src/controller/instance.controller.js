@@ -1,4 +1,4 @@
-const { createOrUpdateStat, findData, } = require("../service/stat")
+const { findOrCreate, findAll, } = require("../service/instance.service")
 
 class StatController
 {
@@ -6,7 +6,7 @@ class StatController
     {
         try
         {
-            const res = await createOrUpdateStat(ctx.request.body);
+            const res = await findOrCreate(ctx.request.body);
             ctx.body = {
                 code: 0,
                 message: '更新数据成功',
@@ -19,13 +19,11 @@ class StatController
         }
     }
 
-    async queryData(ctx)
+    async query(ctx)
     {
         try
         {
-            console.log("请求统计数据参数： " + JSON.stringify(ctx.request.query));
-            const res = await findData(ctx.request.query);
-
+            const res = await findAll(ctx.request.body);
             ctx.body = {
                 code: 0,
                 message: '查询数据成功',
