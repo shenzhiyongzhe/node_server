@@ -23,7 +23,6 @@ class StatController
     {
         try
         {
-            console.log("请求统计数据参数： " + JSON.stringify(ctx.request.query));
             const res = await findData(ctx.request.query);
 
             ctx.body = {

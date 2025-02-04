@@ -4,7 +4,6 @@ const Router = require('koa-router');
 const {
     upload,
     create,
-    update,
     remove,
     restore,
     findAll,
@@ -22,8 +21,6 @@ router.post('/upload', upload);
 // 添加数据接口
 router.post('/', create);
 
-// 修改数据接口
-router.put('/:vm', update);
 
 // 硬删除接口
 // router.delete('/:id', auth, hadAdminPermission, remove)

@@ -8,9 +8,10 @@ class InstanceService
         return await Instance.bulkCreate(list, { updateOnDuplicate: ['ins'] });
     }
 
-    async findAll(ids)
+    async findAll(params)
     {
-        return await Instance.findAll({ where: { id: { [Op.in]: ids } } })
+        const { field, list } = params;
+        return await Instance.findAll({ where: { [field]: { [Op.in]: list } } })
     }
 }
 module.exports = new InstanceService()

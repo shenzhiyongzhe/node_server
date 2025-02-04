@@ -4,7 +4,7 @@ const { createOrUpdateStat, findData, } = require("../service/stat")
 
 class DevicesService
 {
-    async createGoods(vmInfo)
+    async findOrCreate(vmInfo)
     {
         const { vm, ...data } = vmInfo;
         const [devices, created] = await Devices.findOrCreate({
@@ -17,13 +17,6 @@ class DevicesService
             await Devices.update(data, { where: { vm } });
         }
         return devices
-    }
-
-    async updateGoods(vm, goods)
-    {
-        const res = await Devices.update(goods, { where: { vm } });
-
-        return res[0] > 0 ? true : false;
     }
 
     async removeGoods(vm)
@@ -94,6 +87,8 @@ class DevicesService
 
             const date = new Date()
             const today = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, 0)}-${date.getDate().toString().padStart(2, 0)}`
+            const time = `${date.getHours().toString().padStart(2, 0)}:${date.getMinutes().toString().padStart(2, 0)}:${date.getSeconds().toString().padStart(2, 0)}`
+
             const yesterday = new Date(date);
             yesterday.setDate(yesterday.getDate() - 1);
             const yesterdayStr = `${yesterday.getFullYear()}-${(yesterday.getMonth() + 1).toString().padStart(2, 0)}-${yesterday.getDate().toString().padStart(2, 0)}`
@@ -166,7 +161,7 @@ class DevicesService
             const total_produce = daily_produce + yesterdayStat.total_produce;
             const fixedCost = Math.floor(traded_vm_number * 1.17)
             const net_income = daily_produce - fixedCost
-
+            console.log("统计日期为: ", today + " " + time)
             const todayStat = {
                 "date": today,
                 "total_value": account_value + total_produce,

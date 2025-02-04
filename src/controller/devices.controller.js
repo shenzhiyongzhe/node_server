@@ -8,8 +8,7 @@ const {
 } = require('../constant/err.type');
 
 const {
-    createGoods,
-    updateGoods,
+    findOrCreate,
     removeGoods,
     restoreGoods,
     findDevices,
@@ -49,7 +48,7 @@ class DevicesController
     {
         try
         {
-            const res = await createGoods(ctx.request.body);
+            const res = await findOrCreate(ctx.request.body);
             ctx.body = {
                 code: 0,
                 message: '更新device数据成功',
@@ -62,27 +61,6 @@ class DevicesController
         }
     }
 
-    async update(ctx)
-    {
-        try
-        {
-            const res = await updateGoods(ctx.params.vm, ctx.request.body);
-            if (res)
-            {
-                ctx.body = {
-                    code: 0,
-                    message: '修改商品成功',
-                    result: '',
-                };
-            } else
-            {
-                return ctx.app.emit('error', invalidGoodsID, ctx);
-            }
-        } catch (err)
-        {
-            console.error(err);
-        }
-    }
     async remove(ctx)
     {
         const res = await removeGoods(ctx.params.vm);
