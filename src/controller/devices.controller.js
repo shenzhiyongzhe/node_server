@@ -11,7 +11,7 @@ const {
     findOrCreate,
     removeGoods,
     restoreGoods,
-    findDevices,
+    findAllDevices,
     searchDevice,
     collectTodaysData,
     orderDevice,
@@ -97,7 +97,7 @@ class DevicesController
         // 1. 解析pageNum和pageSize
         const { pageNum = 1, pageSize = 500 } = ctx.request.query;
         // 2. 调用数据处理的相关方法
-        const res = await findDevices(pageNum, pageSize);
+        const res = await findAllDevices(pageNum, pageSize);
         // 3. 返回结果
         ctx.body = {
             code: 0,

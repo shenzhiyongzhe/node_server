@@ -13,22 +13,24 @@ class StatService
         return stats;
     }
 
-    async findData(params)
+    async findAllStat(pageNum, pageSize)
     {
-        if (Object.keys(params).length == 0)
-        {
-            const { count, rows } = await Stat.findAndCountAll();
-            return {
-                total: count,
-                list: rows,
-            };
-        }
-        else
-        {
-            const res = await Stat.findOne({ where: { ...params } })
-            return res;
-        }
+        // const offset = (pageNum - 1) * pageSize;
+        const res = await Stat.findAll({
+            // offset: offset,
+            limit: pageSize * 1,
+            order: [["date", 'DESC']]
+        });
+        return res
+    }
+    async findTheDateStat(date)
+    {
+        return await Stat.findByPk(date)
+    }
 
+    async getTotalPageCount()
+    {
+        return await Stat.count()
     }
 }
 

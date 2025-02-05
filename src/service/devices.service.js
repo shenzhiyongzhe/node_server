@@ -1,6 +1,6 @@
 const { Op } = require('sequelize');
 const Devices = require('../model/devices');
-const { createOrUpdateStat, findData, } = require("../service/stat")
+const { createOrUpdateStat, findTheDateStat, } = require("../service/stat")
 
 class DevicesService
 {
@@ -32,14 +32,13 @@ class DevicesService
         return res > 0 ? true : false;
     }
 
-    async findDevices(pageNum, pageSize)
+    async findAllDevices(pageNum, pageSize)
     {
         const offset = (pageNum - 1) * pageSize;
         const { count, rows } = await Devices.findAndCountAll({
             offset: offset,
             limit: pageSize * 1,
             attributes: { exclude: ['historyDealRecord'] }
-
         });
         return {
             pageNum,
@@ -99,7 +98,7 @@ class DevicesService
             const tradedVMList = [];
             const createdCharacterTimeList = []
 
-            let historyDealRecordJsonList = await Devices.findAll({
+            let todayTradedList = await Devices.findAll({
                 attributes: ["vm", "historyDealRecord", "config"],
                 where: {
                     historyDealRecord: { [Op.ne]: null },
@@ -110,7 +109,7 @@ class DevicesService
                 }
             })
 
-            historyDealRecordJsonList.map(list =>
+            todayTradedList.map(list =>
             {
                 const record = JSON.parse(list.historyDealRecord)
                 for (let key in record)
@@ -119,16 +118,20 @@ class DevicesService
                     {
                         todayRecordList.push(record[key])
                         tradedVMList.push(list.vm)
-                        const config = JSON.parse(list.config)
-                        if (config.createCharacterTime)
+                        if (typeof list.config == "string" && list.config != "[object Object]")
                         {
-                            createdCharacterTimeList.push([list.vm, config.createCharacterTime])
+                            const config = JSON.parse(list.config)
+                            if (config.createCharacterTime)
+                            {
+                                createdCharacterTimeList.push([list.vm, config.createCharacterTime])
+                            }
                         }
                     }
                 }
             })
 
             const filterTradedVMList = [...new Set(tradedVMList)]
+
             const traded_vm_number = filterTradedVMList.length;
             const filterCreatedCharacterList = []
 
@@ -154,7 +157,7 @@ class DevicesService
             {
                 account_value += Math.floor(logGrowthFunction(item))
             })
-            let yesterdayStat = await findData({ date: yesterdayStr })
+            let yesterdayStat = await findTheDateStat(yesterdayStr)
             yesterdayStat = yesterdayStat.dataValues;
 
             daily_produce = Math.floor(daily_produce * 0.03);

@@ -1,4 +1,4 @@
-const { createOrUpdateStat, findData, } = require("../service/stat")
+const { createOrUpdateStat, findAllStat, getTotalPageCount } = require("../service/stat")
 
 class StatController
 {
@@ -19,12 +19,13 @@ class StatController
         }
     }
 
-    async queryData(ctx)
+    async findAll(ctx)
     {
         try
         {
-            const res = await findData(ctx.request.query);
-
+            const { pageNum = 1, pageSize = 1 } = ctx.request.query;
+            console.log("页面索引：" + pageNum, pageSize);
+            const res = await findAllStat(pageNum, pageSize);
             ctx.body = {
                 code: 0,
                 message: '查询数据成功',
@@ -37,6 +38,25 @@ class StatController
         }
     }
 
+    async getTotalPageCount(ctx)
+    {
+        try
+        {
+            const res = await getTotalPageCount()
+            const pageSize = 30;
+            const pageNos = Math.ceil(res / pageSize)
+            ctx.body = {
+                code: 0,
+                message: '查询页面总数量成功',
+                result: { pageSize, pageNos },
+            };
+        } catch (error)
+        {
+            console.log(error);
+            return ctx.app.emit('error', "查询数据失败", ctx);
+
+        }
+    }
 }
 
 module.exports = new StatController
