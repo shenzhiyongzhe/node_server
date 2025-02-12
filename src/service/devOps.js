@@ -42,6 +42,11 @@ class DevOpsService
                 console.log("删除数据");
                 updatedList = dataList.filter(item => !parseList.includes(item))
             }
+            else if (action == "clear")
+            {
+                console.log("清空实例数据");
+                updatedList = []
+            }
 
             await DevOps.update({ insList: JSON.stringify(updatedList) }, { where: { project } })
         }

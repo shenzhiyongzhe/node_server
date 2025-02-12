@@ -94,28 +94,37 @@ class DevicesController
     }
     async findAll(ctx)
     {
-        // 1. 解析pageNum和pageSize
-        const { pageNum = 1, pageSize = 500 } = ctx.request.query;
-        // 2. 调用数据处理的相关方法
-        const res = await findAllDevices(pageNum, pageSize);
-        // 3. 返回结果
+        const res = await findAllDevices(ctx.request.body);
         ctx.body = {
             code: 0,
             message: '获取设备列表成功',
             result: res,
         };
     }
+
     async search(ctx)
     {
         try
         {
-            const res = await searchDevice(ctx.request.query.vm);
+            const { list } = ctx.request.body;
+            if (list)
+            {
+                const res = await searchDevice(list);
+                ctx.body = {
+                    code: 0,
+                    message: '搜索数据成功',
+                    result: res,
+                };
+            }
+            else
+            {
+                ctx.body = {
+                    code: 1,
+                    message: '参数错误',
+                    result: null,
+                };
+            }
 
-            ctx.body = {
-                code: 0,
-                message: '搜索数据成功',
-                result: res,
-            };
         } catch (err)
         {
             console.error(err);
@@ -143,7 +152,6 @@ class DevicesController
         try
         {
             const sortArr = JSON.parse(ctx.request.query.sortByArr)
-            console.log("排序参数：" + ctx.request.query.sortByArr)
             const res = await orderDevice(sortArr)
             ctx.body = {
                 code: 0,

@@ -32,24 +32,24 @@ class DevicesService
         return res > 0 ? true : false;
     }
 
-    async findAllDevices(pageNum, pageSize)
+    async findAllDevices(params)
     {
+        const { pageNum = 1, pageSize = 200, attributes = ["vm", "serverName", "lv", "combatPower", "diamond", "monthlyIncome", "config", "updated_at"], ...condition } = params;
         const offset = (pageNum - 1) * pageSize;
-        const { count, rows } = await Devices.findAndCountAll({
+        const res = await Devices.findAll({
             offset: offset,
             limit: pageSize * 1,
-            attributes: { exclude: ['historyDealRecord'] }
+            attributes,
+            where: {
+                ...condition
+            }
         });
-        return {
-            pageNum,
-            pageSize,
-            total: count,
-            list: rows,
-        };
+        return res
     }
-    async searchDevice(vm)
+
+    async searchDevice(list)
     {
-        const res = await Devices.findOne({ where: { vm } });
+        const res = await Devices.findAll({ where: { vm: list }, attributes: ["vm", "serverName", "lv", "combatPower", "diamond", "monthlyIncome", "config", "updated_at"] });
         return res;
     }
 
@@ -76,9 +76,9 @@ class DevicesService
         }
         try
         {
-            const total_vm_number = await Devices.count({ where: { banTimes: { [Op.eq]: 0 } } })
+            const total_vm_number = await Devices.count()
 
-            const total_stock = await Devices.sum('diamond', { where: { banTimes: { [Op.eq]: 0 } } })
+            const total_stock = await Devices.sum('diamond')
 
             const now = new Date();
             const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -191,7 +191,7 @@ class DevicesService
     {
         const res = await Devices.findAll({
             order: [...arr],
-            limit: 500,
+            limit: 200,
             attributes: { exclude: ['historyDealRecord'] }
         })
         return res;
@@ -203,6 +203,8 @@ class DevicesService
         })
         return res;
     }
+
+
 }
 
 module.exports = new DevicesService();

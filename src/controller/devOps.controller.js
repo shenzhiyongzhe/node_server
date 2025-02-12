@@ -9,7 +9,7 @@ class DevOpsController
             const { project, insList, action } = ctx.request.body;
             if (!project || !insList || !action)
             {
-                ctx.body = { code: 1, message: "参数不全" };
+                ctx.body = { code: 1, message: "参数不全", result: null };
                 return;
             }
             const res = await findOrCreate(ctx.request.body);

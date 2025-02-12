@@ -29,8 +29,8 @@ router.post('/:vm/off', remove);
 router.post('/:vm/on', restore);
 
 // 获取商品列表
-router.get('/', findAll);
-router.get('/search', search);
+router.post('/getList', findAll);
+router.post('/search', search);
 router.get('/sortBy', orderByDevices);
 router.get('/collectTodaysStat', collectTodaysStat)
 router.get('/exportDevicesList', exportAllDevices)
