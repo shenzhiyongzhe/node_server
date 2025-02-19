@@ -17,25 +17,17 @@ class DevOpsService
         }
         else
         {
-            const updated_at = moment(res.dataValues.updated_at).tz('Asia/Shanghai').format().toString().slice(0, 10)
+            // const updated_at = moment(res.dataValues.updated_at).tz('Asia/Shanghai').format().toString().slice(0, 10)
 
             const dataList = JSON.parse(res.dataValues?.insList)
             if (action == "add")
             {
-                if (updated_at == getDate())
+                console.log("追加数据");
+                if (dataList)
                 {
-                    console.log("追加数据");
-                    if (dataList)
-                    {
-                        updatedList = [...dataList, ...parseList]
-                    }
-                    updatedList = [...new Set(updatedList)]
+                    updatedList = [...dataList, ...parseList]
                 }
-                else
-                {
-                    console.log("覆盖数据");
-                    updatedList = parseList;
-                }
+                updatedList = [...new Set(updatedList)]
             }
             else if (action == "delete")
             {

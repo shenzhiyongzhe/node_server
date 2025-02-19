@@ -7,10 +7,16 @@ const Devices = seq.define(
     {
         vm: {
             primaryKey: true,
-            type: DataTypes.STRING,
+            type: DataTypes.STRING(20),
             allowNull: false,
             unique: true,
             comment: '云机编号',
+        },
+        id: {
+            type: DataTypes.STRING(10),
+            allowNull: true,
+            unique: true,
+            comment: '云机id',
         },
         serverName: {
             type: DataTypes.STRING,
