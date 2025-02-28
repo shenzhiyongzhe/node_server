@@ -34,7 +34,7 @@ class DevicesService
 
     async findAllDevices(params)
     {
-        const { pageNum = 1, pageSize = 200, attributes = ["vm", "serverName", "lv", "combatPower", "diamond", "monthlyIncome", "config", "updated_at"], ...condition } = params;
+        const { pageNum = 1, pageSize = 200, attributes = ["vm", "id", "serverName", "lv", "combatPower", "diamond", "monthlyIncome", "config", "updated_at"], ...condition } = params;
         const offset = (pageNum - 1) * pageSize;
         const res = await Devices.findAll({
             offset: offset,
@@ -49,7 +49,7 @@ class DevicesService
 
     async searchDevice(list)
     {
-        const res = await Devices.findAll({ where: { vm: list }, attributes: ["vm", "serverName", "lv", "combatPower", "diamond", "monthlyIncome", "config", "updated_at"] });
+        const res = await Devices.findAll({ where: { vm: list }, attributes: ["vm", "id", "serverName", "lv", "combatPower", "diamond", "monthlyIncome", "config", "updated_at"] });
         return res;
     }
 
